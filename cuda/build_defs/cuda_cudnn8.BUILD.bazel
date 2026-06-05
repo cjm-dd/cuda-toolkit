@@ -5,10 +5,10 @@
 # Any user-facing target should be listed in _REPO_PUBLIC_TARGETS so that the
 # @cuda_cudnn8 proxy repository can re-export it.
 
-load("@rules_cc//cc:cc_library.bzl", "cc_library")
-load("@rules_cc//cc:cc_import.bzl", "cc_import")
-load("@{cuda_redist_repo}//:version.bzl", "CUDA_VERSION")
 load("@cuda_toolkit//cuda:versions_helper.bzl", "if_version_equal_or_greater_than")
+load("@rules_cc//cc:cc_import.bzl", "cc_import")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@{cuda_redist_repo}//:version.bzl", "CUDA_VERSION")
 load("//:version.bzl", "LIB_VERSIONS")
 
 cc_import(
@@ -52,18 +52,71 @@ cc_import(
     deps = [":headers"],
     shared_library = "lib/libcudnn.so." + LIB_VERSIONS["libcudnn"],
 )
+
+cc_import(
+    name = "cudnn_ops_infer_static",
+    deps = [":headers"],
+    static_library = "lib/libcudnn_ops_infer_static.a",
+)
+
+cc_import(
+    name = "cudnn_cnn_infer_static",
+    deps = [":headers"],
+    static_library = "lib/libcudnn_cnn_infer_static.a",
+)
+
+cc_import(
+    name = "cudnn_ops_train_static",
+    deps = [":headers"],
+    static_library = "lib/libcudnn_ops_train_static.a",
+)
+
+cc_import(
+    name = "cudnn_cnn_train_static",
+    deps = [":headers"],
+    static_library = "lib/libcudnn_cnn_train_static.a",
+)
+
+cc_import(
+    name = "cudnn_adv_infer_static",
+    deps = [":headers"],
+    static_library = "lib/libcudnn_adv_infer_static.a",
+)
+
+cc_import(
+    name = "cudnn_adv_train_static",
+    deps = [":headers"],
+    static_library = "lib/libcudnn_adv_train_static.a",
+)
+
 cc_library(
     name = "cudnn",
     deps = [
-      ":cudnn_ops_infer",
-      ":cudnn_ops_train",
-      ":cudnn_cnn_infer",
-      ":cudnn_cnn_train",
-      ":cudnn_adv_infer",
-      ":cudnn_adv_train",
-      "@{cuda_redist_repo}//nvrtc:nvrtc",
-      ":cudnn_main",
+        ":cudnn_ops_infer",
+        ":cudnn_ops_train",
+        ":cudnn_cnn_infer",
+        ":cudnn_cnn_train",
+        ":cudnn_adv_infer",
+        ":cudnn_adv_train",
+        "@{cuda_redist_repo}//nvrtc:nvrtc",
+        ":cudnn_main",
     ],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "cudnn_static",
+    alwayslink = True,
+    deps = [
+        ":cudnn_ops_infer_static",
+        ":cudnn_ops_train_static",
+        ":cudnn_cnn_infer_static",
+        ":cudnn_cnn_train_static",
+        ":cudnn_adv_infer_static",
+        ":cudnn_adv_train_static",
+        "@{cuda_redist_repo}//nvrtc:nvrtc_static",
+    ],
+    linkopts = ["-lrt", "-lz"],
     visibility = ["//visibility:public"],
 )
 

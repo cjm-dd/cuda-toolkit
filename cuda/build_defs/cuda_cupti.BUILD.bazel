@@ -5,14 +5,14 @@
 # Any user-facing target should be listed in _REPO_PUBLIC_TARGETS so that the
 # @cuda_cupti proxy repository can re-export it.
 
-load("@rules_cc//cc:cc_library.bzl", "cc_library")
-load("@rules_cc//cc:cc_import.bzl", "cc_import")
-load("//:version.bzl", "LIB_VERSIONS")
 load(
     "@cuda_toolkit//cuda:versions_helper.bzl",
     "if_version_equal_or_greater_than",
     "if_version_lower_than",
 )
+load("@rules_cc//cc:cc_import.bzl", "cc_import")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("//:version.bzl", "LIB_VERSIONS")
 
 # Keep concrete paths explicit; reserve glob only for real patterns.
 _HEADER_FILES = [
@@ -89,9 +89,21 @@ cc_import(
     visibility = ["//visibility:public"],
 )
 
+cc_import(
+    name = "nvperf_host_static_library",
+    deps = [":headers"],
+    static_library = "lib/libnvperf_host_static.a",
+)
+
 cc_library(
     name = "nvperf_host",
     deps = [":nvperf_host_shared_library"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "nvperf_host_static",
+    deps = [":nvperf_host_static_library"],
     visibility = ["//visibility:public"],
 )
 

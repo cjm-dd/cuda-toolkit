@@ -5,8 +5,10 @@
 # Any user-facing target should be listed in _REPO_PUBLIC_TARGETS so that the
 # @cuda_cufft proxy repository can re-export it.
 
-load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@cuda_toolkit//cuda:versions_helper.bzl", "if_version_equal_or_greater_than")
 load("@rules_cc//cc:cc_import.bzl", "cc_import")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@{cuda_redist_repo}//:version.bzl", "CUDA_VERSION")
 load("//:version.bzl", "LIB_VERSIONS")
 
 # Keep concrete paths explicit; reserve glob only for real patterns.
@@ -27,6 +29,17 @@ cc_import(
     name = "cufft_static_library",
     deps = [":headers"],
     static_library = "lib/libcufft_static.a",
+)
+
+cc_import(
+    name = "cufft_static_nocallback_library",
+    deps = [":headers"],
+    static_library = if_version_equal_or_greater_than(
+        CUDA_VERSION,
+        "13.0.0",
+        "lib/libcufft_static.a",
+        "lib/libcufft_static_nocallback.a",
+    ),
 )
 
 cc_library(
@@ -57,6 +70,13 @@ cc_library(
 cc_library(
     name = "cufft_static",
     deps = [":cufft_static_library"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "cufft_static_nocallback",
+    deps = [":cufft_static_nocallback_library"],
+    linkopts = ["-Wl,--no-relax"],
     visibility = ["//visibility:public"],
 )
 

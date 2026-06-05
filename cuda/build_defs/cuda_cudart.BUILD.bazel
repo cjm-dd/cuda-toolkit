@@ -5,13 +5,13 @@
 # Any user-facing target should be listed in _REPO_PUBLIC_TARGETS so that the
 # @cuda_cudart proxy repository can re-export it.
 
-load("@rules_cc//cc:cc_library.bzl", "cc_library")
-load("@rules_cc//cc:cc_import.bzl", "cc_import")
 load(
     "@cuda_toolkit//cuda:versions_helper.bzl",
     "if_version_equal_or_greater_than",
     "if_version_lower_than",
 )
+load("@rules_cc//cc:cc_import.bzl", "cc_import")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@{cuda_redist_repo}//:version.bzl", "CUDA_VERSION")
 load("//:version.bzl", "LIB_VERSIONS", "VERSION")
 
@@ -113,6 +113,12 @@ cc_import(
 )
 
 cc_import(
+    name = "culibos_static",
+    deps = [":headers"],
+    static_library = "lib/libculibos.a",
+)
+
+cc_import(
     name = "cuda_stub",
     deps = [":cuda"],
     interface_library = "lib/stubs/libcuda.so",
@@ -155,7 +161,12 @@ cc_library(
         CUDA_VERSION,
         "13.0.0",
         ["@{cuda_redist_repo}//culibos:culibos_static"],
+    ) + if_version_lower_than(
+        CUDA_VERSION,
+        "13.0.0",
+        [":culibos_static"],
     ),
+    linkopts = ["-lrt"],
     visibility = ["//visibility:public"],
 )
 
