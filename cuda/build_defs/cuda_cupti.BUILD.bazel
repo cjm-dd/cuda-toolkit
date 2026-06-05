@@ -152,6 +152,7 @@ filegroup(
     ]) + if_version_equal_or_greater_than(LIB_VERSIONS["libcupti"], "2024.3", [
         "include/cupti_pmsampling.h",
         "include/cupti_profiler_host.h",
+    ]) + if_version_equal_or_greater_than(LIB_VERSIONS["libcupti"], "2024.3.2", [
         "include/cupti_range_profiler.h",
     ]) + if_version_lower_than(LIB_VERSIONS["libcupti"], "2026.2.0", [
         "include/generated_cudart_removed_meta.h",
