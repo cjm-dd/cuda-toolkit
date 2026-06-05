@@ -121,3 +121,49 @@ Current scope is the CUDA redistribution model implemented by this repository.
 
 The contract should describe what the code actually supports today, not aspirational future support.
 Platform support, component support, and version support are all determined by the repository rules and registered metadata, and may legitimately differ across releases.
+
+## Operational Map
+
+Public surface:
+- `@cuda//<component>:<target>`
+- `@cuda//cuda:<target>`
+- concrete generated repositories are internal; do not expose them in docs or examples
+
+Key files:
+- `extensions/cuda.bzl`: module extension entrypoint
+- `cuda/cuda_redist_versions.json`: supported CUDA version pins
+- `cudnn/cudnn_redist_versions.json`: supported cuDNN version pins
+- `nvshmem/nvshmem_redist_versions.json`: supported NVSHMEM version pins
+- `cuda/cuda_redist_build_defs.bzl`: CUDA component registry and template selection
+- `cudnn/cudnn_redist_build_defs.bzl`: cuDNN component registry and template selection
+- `nvshmem/nvshmem_redist_build_defs.bzl`: NVSHMEM component registry and template selection
+- `cuda/redist_proxy_targets.bzl`: stable public target catalog
+- `cuda/build_defs/*.BUILD.bazel`: per-component generated repository templates
+- `e2e/`: consumer-style validation module
+
+## Change Rules
+
+- Preserve stable labels when upstream files move between components.
+- Prefer remapping or aliasing over forcing downstream migrations.
+- Do not invent fake components when upstream does not ship one.
+- Keep broad version selection in registries; keep fine layout differences in BUILD templates.
+- Add public targets through `redist_proxy_targets.bzl` plus matching templates.
+- Public API changes require README/docs review.
+
+## Verification
+
+Fast check:
+- `bazel build //...`
+
+Consumer/e2e check:
+- from `e2e/`: `bazel build //:all --platforms //:platform_linux_amd64_cuda_13_3_0`
+
+CI matrix mirrors:
+- `12_8_1`
+- `12_9_1`
+- `13_0_2`
+- `13_1_1`
+- `13_2_1`
+- `13_3_0`
+
+For compatibility-sensitive changes, run the relevant e2e platform for every affected CUDA major/minor.
