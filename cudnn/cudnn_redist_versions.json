@@ -39,5 +39,8 @@
   "9.18.1": ["https://developer.download.nvidia.com/compute/cudnn/redist/redistrib_9.18.1.json", "f1967c08554f07d1a85638e44debaa4ad75696fc170cf1f1f1718ae13d3c64da"],
   "9.19.0": ["https://developer.download.nvidia.com/compute/cudnn/redist/redistrib_9.19.0.json", "6ad4f2c047ee03131d1efb95db56f78c24953cb30880a2edcf99407ff9362a04"],
   "9.19.1": ["https://developer.download.nvidia.com/compute/cudnn/redist/redistrib_9.19.1.json", "ee7bd6872b8611017bfc9ac99a4a71932652d1851b5917aa2c66bf29a12f8fd4"],
-  "9.20.0": ["https://developer.download.nvidia.com/compute/cudnn/redist/redistrib_9.20.0.json", "488be2657edfaaa9eada30247de95e81e3ce767f504dccb847d422cd358226a0"]
+  "9.20.0": ["https://developer.download.nvidia.com/compute/cudnn/redist/redistrib_9.20.0.json", "488be2657edfaaa9eada30247de95e81e3ce767f504dccb847d422cd358226a0"],
+  "9.21.0": ["https://developer.download.nvidia.com/compute/cudnn/redist/redistrib_9.21.0.json", "946dfcb95f1d5552546190eb68e72c2090a9a3849a46378c202b3a74c55da505"],
+  "9.21.1": ["https://developer.download.nvidia.com/compute/cudnn/redist/redistrib_9.21.1.json", "3c51347afefe8bf2a051a1a3160fee48c46182b019435e7805f3c1126d0ee330"],
+  "9.22.0": ["https://developer.download.nvidia.com/compute/cudnn/redist/redistrib_9.22.0.json", "3dbb9002d52112ef69aa09187f523ef1ff07f8baf3892ee01e540af639d8f55f"]
 }
