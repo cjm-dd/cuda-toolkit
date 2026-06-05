@@ -4,7 +4,10 @@ bzl_library(
     name = "cuda_compat_repository",
     srcs = ["cuda_compat_repository.bzl"],
     visibility = ["//visibility:public"],
-    deps = [":selects_internal"],
+    deps = [
+        ":redist_proxy_targets",
+        ":selects_internal",
+    ],
 )
 
 bzl_library(
@@ -21,14 +24,16 @@ bzl_library(
     name = "selects_internal",
     srcs = ["selects_internal.bzl"],
     visibility = ["//visibility:public"],
-    deps = ["@bazel_skylib//lib:selects"],
+    deps = [
+        ":versions_helper",
+        "@bazel_skylib//lib:selects",
+    ],
 )
 
 bzl_library(
     name = "versions_helper",
     srcs = ["versions_helper.bzl"],
     visibility = ["//visibility:public"],
-    deps = [":selects_internal"],
 )
 
 bzl_library(
@@ -54,7 +59,10 @@ bzl_library(
     name = "declare_constraints",
     srcs = ["declare_constraints.bzl"],
     visibility = ["//visibility:public"],
-    deps = ["@bazel_skylib//lib:selects"],
+    deps = [
+        ":versions_helper",
+        "@bazel_skylib//lib:selects",
+    ],
 )
 
 bzl_library(
