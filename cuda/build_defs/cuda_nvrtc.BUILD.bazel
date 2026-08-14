@@ -24,6 +24,14 @@ cc_import(
 )
 
 cc_import(
+    name = "nvrtc_builtins_interface_library",
+    deps = [":headers"],
+    interface_library = "lib/libnvrtc-builtins.so",
+    system_provided = True,
+    visibility = ["//visibility:public"],
+)
+
+cc_import(
     name = "nvrtc_static_library",
     deps = [":headers"],
     static_library = "lib/libnvrtc_static.a",
@@ -42,8 +50,20 @@ cc_library(
 )
 
 cc_library(
+    name = "nvrtc_builtins_system",
+    deps = [":nvrtc_builtins_interface_library"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
     name = "nvrtc",
     deps = [":nvrtc_main", ":nvrtc_builtins"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "nvrtc_system",
+    deps = [":nvrtc_stub", ":nvrtc_builtins_system"],
     visibility = ["//visibility:public"],
 )
 
@@ -87,7 +107,6 @@ filegroup(
     ],
     visibility = ["//visibility:public"],
 )
-
 
 cc_library(
     name = "headers",
