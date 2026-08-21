@@ -296,12 +296,12 @@ def _cuda_impl(mctx):
 _configure = tag_class(
     doc = "Configures settings shared by all generated CUDA repositories.",
     attrs = {
-        "default_package_metadata": attr.label_list(
-            doc = "Metadata targets applied by default to packages in every generated repository.",
-        ),
         "name": attr.string(
             default = "cuda",
             doc = "Name of the global compatibility repository.",
+        ),
+        "default_package_metadata": attr.label_list(
+            doc = "Metadata targets applied by default to packages in every generated repository.",
         ),
     },
 )

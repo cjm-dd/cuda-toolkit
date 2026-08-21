@@ -41,8 +41,8 @@ Example `MODULE.bazel` setup:
 cuda_ext = use_extension("@cuda_toolkit//extensions:cuda.bzl", "cuda")
 
 cuda_ext.configure(
-    default_package_metadata = ["//:cuda_package_metadata"],
     name = "cuda",
+    default_package_metadata = ["//:cuda_package_metadata"],
 )
 
 cuda_ext.redist(
