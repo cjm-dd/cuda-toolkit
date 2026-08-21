@@ -57,7 +57,7 @@ use_repo(cuda_ext, "cuda")
 ## Notes
 
 - CUDA versions are registered explicitly with `cuda_ext.redist(...)`.
-- `cuda_ext.configure(default_package_metadata = [...])` optionally applies package metadata to all targets in every generated CUDA repository through `REPO.bazel`.
+- `cuda_ext.configure(...)` can set the global proxy repository's `name` and optionally apply `default_package_metadata` to every generated repository through `REPO.bazel`.
 - cuDNN and NVSHMEM versions, when used, are pinned on the same `cuda_ext.redist(...)` tag.
 - CUDA packages under `@cuda//<components>` are platform-resolving proxies. The selected concrete redistribution
   is chosen from the current Bazel configuration platform (including exec config).

@@ -33,7 +33,7 @@ def _collect_redist_tags(mctx):
         fail("cuda extension requires at least one redist tag")
     return tags
 
-def _collect_default_package_metadata(mctx):
+def _collect_configuration(mctx):
     all_tags = []
     root_tags = []
     for mod in mctx.modules:
@@ -46,9 +46,19 @@ def _collect_default_package_metadata(mctx):
     if len(tags) > 1:
         fail("cuda extension accepts at most one configure tag")
     if not tags:
-        return []
+        return struct(
+            default_package_metadata = [],
+            name = "cuda",
+        )
 
-    return [str(label) for label in tags[0].default_package_metadata]
+    tag = tags[0]
+    if not tag.name:
+        fail("cuda configure name must not be empty")
+
+    return struct(
+        default_package_metadata = [str(label) for label in tag.default_package_metadata],
+        name = tag.name,
+    )
 
 def _get_url_sha_from_version_map(version, version_to_url_sha, toolkit_name):
     url_sha = version_to_url_sha.get(version)
@@ -84,7 +94,8 @@ def _cuda_impl(mctx):
     nvshmem_version_map = json.decode(mctx.read(_NVSHMEM_REDIST_VERSIONS_JSON))
 
     tags = _collect_redist_tags(mctx)
-    default_package_metadata = _collect_default_package_metadata(mctx)
+    configuration = _collect_configuration(mctx)
+    default_package_metadata = configuration.default_package_metadata
 
     seen_repo_names = {}
     versions = []
@@ -99,8 +110,8 @@ def _cuda_impl(mctx):
     nvshmem_versions_to_fetch = []
     nvshmem_redistributions_by_version = {}
     for tag in tags:
-        if tag.name == "cuda":
-            fail("redist name 'cuda' is reserved for the global aggregated CUDA repository")
+        if tag.name == configuration.name:
+            fail("redist name '{}' is reserved for the global aggregated CUDA repository".format(configuration.name))
 
         if tag.name in seen_repo_names:
             fail("Duplicate redist name '{}'".format(tag.name))
@@ -270,7 +281,7 @@ def _cuda_impl(mctx):
         )
 
     cuda_compat_repository(
-        name = "cuda",
+        name = configuration.name,
         available_cuda_versions = sorted(cuda_version_map.keys()),
         default_package_metadata = default_package_metadata,
         registered_cuda_versions = sorted(versions),
@@ -287,6 +298,10 @@ _configure = tag_class(
     attrs = {
         "default_package_metadata": attr.label_list(
             doc = "Metadata targets applied by default to packages in every generated repository.",
+        ),
+        "name": attr.string(
+            default = "cuda",
+            doc = "Name of the global compatibility repository.",
         ),
     },
 )

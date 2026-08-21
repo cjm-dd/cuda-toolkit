@@ -48,7 +48,7 @@ def _render_build_file(name, targets, platform_repo_mappings):
             )
 
         lines.extend([
-            "    }}, no_match_error = \"@cuda//{{}}: platform-specific target '{{}}' unavailable for selected platform\"),".format(
+            "    }}, no_match_error = \"CUDA component '{}': platform-specific target '{}' unavailable for selected platform\"),".format(
                 name,
                 target_name,
             ),
