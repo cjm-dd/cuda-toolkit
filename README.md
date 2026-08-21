@@ -42,6 +42,7 @@ cuda_ext = use_extension("@cuda_toolkit//extensions:cuda.bzl", "cuda")
 
 cuda_ext.configure(
     default_package_metadata = ["//:cuda_package_metadata"],
+    name = "cuda_proxy",
 )
 
 cuda_ext.redist(
@@ -51,7 +52,7 @@ cuda_ext.redist(
     nvshmem_version = "3.3.24",
 )
 
-use_repo(cuda_ext, "cuda")
+use_repo(cuda_ext, cuda = "cuda_proxy")
 ```
 
 ## Notes
