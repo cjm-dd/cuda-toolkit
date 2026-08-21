@@ -17,6 +17,10 @@ register_toolchains("@llvm//toolchain:all")
 
 cuda_ext = use_extension("@cuda_toolkit//extensions:cuda.bzl", "cuda")
 
+cuda_ext.configure(
+    default_package_metadata = ["//:cuda_package_metadata"],
+)
+
 cuda_ext.redist(
     name = "cuda_12_8_1",
     version = "12.8.1",

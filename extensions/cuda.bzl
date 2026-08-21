@@ -33,6 +33,23 @@ def _collect_redist_tags(mctx):
         fail("cuda extension requires at least one redist tag")
     return tags
 
+def _collect_default_package_metadata(mctx):
+    all_tags = []
+    root_tags = []
+    for mod in mctx.modules:
+        for tag in mod.tags.configure:
+            all_tags.append(tag)
+            if mod.is_root:
+                root_tags.append(tag)
+
+    tags = root_tags if root_tags else all_tags
+    if len(tags) > 1:
+        fail("cuda extension accepts at most one configure tag")
+    if not tags:
+        return []
+
+    return [str(label) for label in tags[0].default_package_metadata]
+
 def _get_url_sha_from_version_map(version, version_to_url_sha, toolkit_name):
     url_sha = version_to_url_sha.get(version)
     if not url_sha:
@@ -67,6 +84,7 @@ def _cuda_impl(mctx):
     nvshmem_version_map = json.decode(mctx.read(_NVSHMEM_REDIST_VERSIONS_JSON))
 
     tags = _collect_redist_tags(mctx)
+    default_package_metadata = _collect_default_package_metadata(mctx)
 
     seen_repo_names = {}
     versions = []
@@ -154,6 +172,7 @@ def _cuda_impl(mctx):
             redist = redistributions_by_version[tag.version],
             cuda_repo_name = tag.name,
             cuda_version = tag.version,
+            default_package_metadata = default_package_metadata,
         )
 
         component_proxy_specs = {}
@@ -180,6 +199,7 @@ def _cuda_impl(mctx):
                 cuda_version = tag.version,
                 cuda_redist_path_prefix = CUDNN_REDIST_PATH_PREFIX,
                 components_registry = CUDNN_COMPONENTS_REGISTRY,
+                default_package_metadata = default_package_metadata,
             )
             if not generated_cudnn_repos:
                 fail("cuDNN version '{}' did not generate any repositories for CUDA {}".format(tag.cudnn_version, tag.version))
@@ -207,6 +227,7 @@ def _cuda_impl(mctx):
                 cuda_version = tag.version,
                 cuda_redist_path_prefix = NVSHMEM_REDIST_PATH_PREFIX,
                 components_registry = NVSHMEM_COMPONENTS_REGISTRY,
+                default_package_metadata = default_package_metadata,
             )
             if not generated_nvshmem_repos:
                 fail("NVSHMEM version '{}' did not generate any repositories for CUDA {}".format(tag.nvshmem_version, tag.version))
@@ -231,6 +252,7 @@ def _cuda_impl(mctx):
             # Re-exports targets from platform-specific repositories under a unified repository.
             cuda_component_proxy(
                 name = component_proxy_repo_name,
+                default_package_metadata = default_package_metadata,
                 version = spec["version"],
                 platform_repo_mappings = spec["platform_repo_mappings"],
                 targets = spec["targets"],
@@ -244,11 +266,13 @@ def _cuda_impl(mctx):
             cuda_version = tag.version,
             available_component_mappings = available_component_mappings,
             available_component_versions = available_component_versions,
+            default_package_metadata = default_package_metadata,
         )
 
     cuda_compat_repository(
         name = "cuda",
         available_cuda_versions = sorted(cuda_version_map.keys()),
+        default_package_metadata = default_package_metadata,
         registered_cuda_versions = sorted(versions),
         version_to_redist_repo_name = {
             tag.version: tag.name
@@ -257,6 +281,15 @@ def _cuda_impl(mctx):
     )
 
     return mctx.extension_metadata(reproducible = True)
+
+_configure = tag_class(
+    doc = "Configures settings shared by all generated CUDA repositories.",
+    attrs = {
+        "default_package_metadata": attr.label_list(
+            doc = "Metadata targets applied by default to packages in every generated repository.",
+        ),
+    },
+)
 
 _redist = tag_class(
     attrs = {
@@ -269,5 +302,8 @@ _redist = tag_class(
 
 cuda = module_extension(
     implementation = _cuda_impl,
-    tag_classes = {"redist": _redist},
+    tag_classes = {
+        "configure": _configure,
+        "redist": _redist,
+    },
 )

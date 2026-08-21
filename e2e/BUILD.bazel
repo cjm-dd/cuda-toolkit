@@ -4,6 +4,10 @@ load("@cuda//cuda:selects.bzl", "if_cuda_version")
 
 package(default_visibility = ["//visibility:public"])
 
+filegroup(
+    name = "cuda_package_metadata",
+)
+
 SMOKE_CUDA_VERSIONS = [
     "12.8.1",
     "12.9.1",
