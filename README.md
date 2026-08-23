@@ -62,6 +62,10 @@ use_repo(cuda_ext, "cuda")
 - cuDNN and NVSHMEM versions, when used, are pinned on the same `cuda_ext.redist(...)` tag.
 - CUDA packages under `@cuda//<components>` are platform-resolving proxies. The selected concrete redistribution
   is chosen from the current Bazel configuration platform (including exec config).
+- CUDA libraries backed by `*_shared_library` imports also expose `*_interface_library` imports and public
+  `foo_system` wrappers. These targets link through the redistribution's lightweight stub libraries where available
+  (and otherwise through its unversioned `.so` interface) and mark the runtime library as system-provided, so the
+  matching CUDA libraries must be available in the runtime environment.
 - For local validation on non-Linux hosts, you can force Linux selection with
   `--platforms=//:platform_linux_amd64` or `--platforms=//:platform_linux_arm64`.
 
