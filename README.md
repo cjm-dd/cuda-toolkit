@@ -40,6 +40,11 @@ Example `MODULE.bazel` setup:
 ```starlark
 cuda_ext = use_extension("@cuda_toolkit//extensions:cuda.bzl", "cuda")
 
+cuda_ext.configure(
+    name = "cuda",
+    default_package_metadata = ["//:cuda_package_metadata"],
+)
+
 cuda_ext.redist(
     name = "cuda_12_9_1",
     version = "12.9.1",
@@ -53,6 +58,7 @@ use_repo(cuda_ext, "cuda")
 ## Notes
 
 - CUDA versions are registered explicitly with `cuda_ext.redist(...)`.
+- `cuda_ext.configure(...)` can set the global proxy repository's `name` and optionally apply `default_package_metadata` to every generated repository through `REPO.bazel`.
 - cuDNN and NVSHMEM versions, when used, are pinned on the same `cuda_ext.redist(...)` tag.
 - CUDA packages under `@cuda//<components>` are platform-resolving proxies. The selected concrete redistribution
   is chosen from the current Bazel configuration platform (including exec config).
