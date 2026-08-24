@@ -134,15 +134,20 @@ Key files:
 - `cuda/cuda_redist_versions.json`: supported CUDA version pins
 - `cudnn/cudnn_redist_versions.json`: supported cuDNN version pins
 - `nvshmem/nvshmem_redist_versions.json`: supported NVSHMEM version pins
+- `nccl/nccl_redist_versions.json`: generated NCCL archive metadata
+- `nccl/update_redists.py`: NCCL catalog updater and archive verifier, run through `//tools/nccl:update_redists`
 - `cuda/cuda_redist_build_defs.bzl`: CUDA component registry and template selection
 - `cudnn/cudnn_redist_build_defs.bzl`: cuDNN component registry and template selection
 - `nvshmem/nvshmem_redist_build_defs.bzl`: NVSHMEM component registry and template selection
+- `nccl/nccl_redist_build_defs.bzl`: NCCL component registry and template selection
 - `cuda/redist_proxy_targets.bzl`: stable public target catalog
 - `cuda/build_defs/*.BUILD.bazel`: per-component generated repository templates
 - `e2e/`: consumer-style validation module
 
 ## Change Rules
 
+- Generated catalogs and cohesive follow-ups to an existing PR do not require a stack based on changed-line count alone.
+- Maintenance-only Bazel tooling belongs under `//tools`. Use language-native rules, keep tool-only dependencies as Bzlmod dev dependencies, and do not load those rules from production packages.
 - Preserve stable labels when upstream files move between components.
 - Prefer remapping or aliasing over forcing downstream migrations.
 - Do not invent fake components when upstream does not ship one.

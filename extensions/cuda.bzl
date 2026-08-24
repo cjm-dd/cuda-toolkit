@@ -10,6 +10,12 @@ load(
     "CUDNN_REDIST_PATH_PREFIX",
 )
 load(
+    "//nccl:nccl_redist_build_defs.bzl",
+    "NCCL_COMPONENTS_REGISTRY",
+    "NCCL_REDIST_PATH_PREFIX",
+    "get_nccl_redist",
+)
+load(
     "//nvshmem:nvshmem_redist_build_defs.bzl",
     "NVSHMEM_COMPONENTS_REGISTRY",
     "NVSHMEM_REDIST_PATH_PREFIX",
@@ -17,6 +23,7 @@ load(
 
 _CUDA_REDIST_VERSIONS_JSON = Label("//cuda:cuda_redist_versions.json")
 _CUDNN_REDIST_VERSIONS_JSON = Label("//cudnn:cudnn_redist_versions.json")
+_NCCL_REDIST_VERSIONS_JSON = Label("//nccl:nccl_redist_versions.json")
 _NVSHMEM_REDIST_VERSIONS_JSON = Label("//nvshmem:nvshmem_redist_versions.json")
 
 def _collect_redist_tags(mctx):
@@ -91,11 +98,22 @@ def _read_downloaded_json(mctx, pending_download):
 def _cuda_impl(mctx):
     cuda_version_map = json.decode(mctx.read(_CUDA_REDIST_VERSIONS_JSON))
     cudnn_version_map = json.decode(mctx.read(_CUDNN_REDIST_VERSIONS_JSON))
+    nccl_version_map = json.decode(mctx.read(_NCCL_REDIST_VERSIONS_JSON))
     nvshmem_version_map = json.decode(mctx.read(_NVSHMEM_REDIST_VERSIONS_JSON))
 
     tags = _collect_redist_tags(mctx)
     configuration = _collect_configuration(mctx)
     default_package_metadata = configuration.default_package_metadata
+
+    # Validate NCCL/CUDA compatibility before starting any remote downloads.
+    nccl_redistributions_by_tag_name = {}
+    for tag in tags:
+        if tag.nccl_version:
+            nccl_redistributions_by_tag_name[tag.name] = get_nccl_redist(
+                nccl_version_map,
+                tag.nccl_version,
+                tag.version,
+            )
 
     seen_repo_names = {}
     versions = []
@@ -255,6 +273,32 @@ def _cuda_impl(mctx):
                     component_proxy_specs[repo_name] = spec
                 spec["platform_repo_mappings"][generated["config_setting"]] = generated["concrete_repo_name"]
 
+        if tag.nccl_version:
+            nccl_redist = nccl_redistributions_by_tag_name[tag.name]
+
+            generated_nccl_repos = cuda_redist_repositories(
+                redist = {"libnccl": nccl_redist["libnccl"]},
+                cuda_repo_name = tag.name,
+                cuda_version = tag.version,
+                cuda_redist_path_prefix = NCCL_REDIST_PATH_PREFIX,
+                components_registry = NCCL_COMPONENTS_REGISTRY,
+                default_package_metadata = default_package_metadata,
+            )
+            if not generated_nccl_repos:
+                fail("NCCL version '{}' did not generate any repositories for CUDA {}".format(tag.nccl_version, tag.version))
+
+            for generated in generated_nccl_repos:
+                repo_name = generated["component_repo_name"]
+                spec = component_proxy_specs.get(repo_name)
+                if not spec:
+                    spec = {
+                        "version": generated["version"],
+                        "targets": generated["targets"],
+                        "platform_repo_mappings": {},
+                    }
+                    component_proxy_specs[repo_name] = spec
+                spec["platform_repo_mappings"][generated["config_setting"]] = generated["concrete_repo_name"]
+
         available_component_versions = {}
         available_component_mappings = {}
         for repo_name, spec in component_proxy_specs.items():
@@ -312,6 +356,7 @@ _redist = tag_class(
         "version": attr.string(mandatory = True),
         "cudnn_version": attr.string(),
         "nvshmem_version": attr.string(),
+        "nccl_version": attr.string(),
     },
 )
 
